@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HomeSIEM Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #0f1117; color: #e6e6e6; }
+    header { padding: 16px 24px; background: #161b22; border-bottom: 1px solid #30363d; }
+    h1 { margin: 0; font-size: 20px; }
+    main { padding: 24px; display: grid; gap: 24px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #30363d; }
+    .sev-high, .sev-critical { color: #ff6b6b; font-weight: 600; }
+    .sev-medium { color: #f1c40f; }
+    .sev-low { color: #2ecc71; }
+    .sev-info { color: #58a6ff; }
+    input, select { background: #0d1117; color: #e6e6e6; border: 1px solid #30363d;
+                    border-radius: 6px; padding: 6px 8px; }
+  </style>
+</head>
+<body>
+  <header><h1>🛡 HomeSIEM Dashboard</h1></header>
+  <main>
+    <div class="card">
+      <h2>Alerts</h2>
+      <table id="alerts"><thead><tr>
+        <th>Time</th><th>Rule</th><th>Severity</th><th>MITRE</th><th>Message</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <h2>Events
+        <select id="filter">
+          <option value="">all categories</option>
+          <option value="authentication">authentication</option>
+          <option value="network">network</option>
+          <option value="process">process</option>
+          <option value="syslog">syslog</option>
+        </select>
+      </h2>
+      <table id="events"><thead><tr>
+        <th>Time</th><th>Source</th><th>Host</th><th>Category</th>
+        <th>Severity</th><th>Message</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </main>
+  <script>
+    const fmt = ts => new Date(ts * 1000).toLocaleString();
+    const sev = s => `<span class="sev-${s}">${s}</span>`;
+
+    async function loadAlerts() {
+      const rows = await (await fetch('/api/alerts')).json();
+      document.querySelector('#alerts tbody').innerHTML = rows.map(a =>
+        `<tr><td>${fmt(a.timestamp)}</td><td>${a.rule}</td>
+         <td>${sev(a.severity)}</td><td>${a.mitre || ''}</td>
+         <td>${a.message}</td></tr>`).join('');
+    }
+    async function loadEvents() {
+      const cat = document.querySelector('#filter').value;
+      const url = '/api/events' + (cat ? `?category=${cat}` : '');
+      const rows = await (await fetch(url)).json();
+      document.querySelector('#events tbody').innerHTML = rows.map(e =>
+        `<tr><td>${fmt(e.timestamp)}</td><td>${e.source}</td><td>${e.host||''}</td>
+         <td>${e.category}</td><td>${sev(e.severity)}</td>
+         <td>${e.message}</td></tr>`).join('');
+    }
+    document.querySelector('#filter').addEventListener('change', loadEvents);
+    function refresh() { loadAlerts(); loadEvents(); }
+    refresh();
+    setInterval(refresh, 10000);
+  </script>
+</body>
+</html>
