@@ -1,0 +1,27 @@
+# Copy this to config.yaml and edit. config.yaml is gitignored (keep secrets local).
+
+# Your home subnet in CIDR notation (check your router/ipconfig).
+subnet: "192.168.1.0/24"
+
+# Syslog listener (router & Linux/Mac devices forward here).
+syslog_host: "0.0.0.0"
+syslog_port: 5140        # use 514 if running with elevated privileges
+
+# How often (seconds) to sweep the network for new devices.
+scan_interval: 300.0
+
+# Local database file.
+db_path: "homesiem.db"
+
+# Dashboard (kept on localhost so it isn't exposed to the network).
+dashboard_host: "127.0.0.1"
+dashboard_port: 8080
+
+# Discord alerting. PASTE YOUR WEBHOOK URL HERE IN YOUR LOCAL config.yaml ONLY.
+# Never commit this value. Leave blank to disable alerting.
+discord_webhook_url: ""
+
+# Toggle collectors.
+enable_windows_eventlog: true
+enable_network_discovery: true
+enable_syslog: true
