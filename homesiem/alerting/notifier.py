@@ -36,7 +36,10 @@ class DiscordNotifier:
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
             self.webhook_url, data=data,
-            headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "HomeSIEM (https://github.com/JasonDacy/homesiem, 1.0)",
+        },
         )
         try:
             urllib.request.urlopen(req, timeout=10)
